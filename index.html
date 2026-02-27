@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="더블유 게임즈 인트라넷 — DUC Hub · 사내 게시판 · 회사 현황">
+<meta name="robots" content="noindex, nofollow">
+<title>더블유 게임즈 인트라넷</title>
+
+<!-- 구글 폰트: 사내 네트워크에서 외부 CDN 차단 시 시스템 폰트로 자동 폴백 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ══════════════════════════════════════
+     DESIGN TOKENS
+     ══════════════════════════════════════ */
+  :root {
+    --font: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --border: #e0e0e0;
+    --border-light: #e8e8e8;
+    --border-subtle: #f0f0f0;
+    --border-input: #f3f3f3;
+    --text-primary: #333333;
+    --text-secondary: #555555;
+    --text-tertiary: #666666;
+    --text-muted: #888888;
+    --text-dim: #999999;
+    --text-faint: #aaaaaa;
+    --text-ghost: #bbbbbb;
+    --text-placeholder: #cccccc;
+    --blue: #5b8def;
+    --blue-light: #d0dff7;
+    --blue-lighter: #e8efff;
+    --blue-bg: #f5f8ff;
+    --blue-bg2: #eef3ff;
+    --blue-bg3: #f0f5ff;
+    --blue-border: #d0dff7;
+    --blue-mid: #a8c4f0;
+    --green: #388e3c;
+    --green-bg: #e8f5e9;
+    --red: #e05555;
+    --red-bg: #fce4ec;
+    --amber: #b08800;
+    --amber-dark: #8a5a00;
+    --amber-bg: #fff5e0;
+    --amber-bg2: #fff3e0;
+    --doc-bg: #e3f2fd;
+    --radius: 8px;
+    --radius-sm: 6px;
+    --radius-xs: 5px;
+    --radius-badge: 3px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ══════════════════════════════════════
+     TOPBAR
+     ══════════════════════════════════════ */
+  .topbar {
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; }
+  .topbar-logo svg { width: 28px; height: 28px; }
+  .topbar-logo-text { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+  .topbar-hamburger { font-size: 18px; color: var(--text-tertiary); cursor: pointer; }
+  .topbar-search { font-size: 18px; color: var(--text-dim); cursor: pointer; }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-tertiary); font-size: 16px;
+  }
+  .topbar-icon:hover { background: var(--bg); }
+  .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; background: #ddd; border: 2px solid var(--text-placeholder); }
+
+  /* ══════════════════════════════════════
+     LAYOUT
+     ══════════════════════════════════════ */
+  .layout { display: flex; min-height: calc(100vh - 52px); }
+
+  /* ══════════════════════════════════════
+     SIDEBAR
+     ══════════════════════════════════════ */
+  .sidebar {
+    width: 230px;
+    background: var(--surface);
+    border-right: 1px solid var(--border-light);
+    padding-top: 16px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    position: sticky;
+    top: 52px;
+    height: calc(100vh - 52px);
+  }
+
+  .sidebar-role { padding: 12px 20px 8px; font-size: 11.5px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+
+  .sidebar-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; font-size: 13px; font-weight: 500;
+    color: var(--text-primary); cursor: pointer; user-select: none;
+  }
+  .sidebar-header:hover { background: #f8f8f8; }
+  .sidebar-header-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text-muted); }
+  .sidebar-header-arrow { margin-left: auto; font-size: 10px; color: var(--text-ghost); }
+  .sidebar-header.active { background: var(--blue-bg2); border-radius: 4px; margin: 0 8px; padding: 10px 12px; }
+
+  .sidebar-sub-item { padding: 8px 20px 8px 50px; font-size: 12.5px; color: var(--text-tertiary); cursor: pointer; }
+  .sidebar-sub-item:hover { background: #f8f8f8; color: var(--text-primary); }
+
+  .sidebar-divider { height: 1px; background: #eee; margin: 8px 16px; }
+
+  .sidebar-dropdown { margin: 8px 12px; border: 1px solid var(--blue-border); border-radius: var(--radius-sm); background: var(--surface); overflow: hidden; }
+  .sidebar-dropdown-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: var(--blue-bg); cursor: pointer;
+    font-size: 12px; font-weight: 600; color: var(--text-primary);
+    user-select: none; border-bottom: 1px solid #e4ecf8;
+  }
+  .sidebar-dropdown-header:hover { background: #edf2ff; }
+  .sidebar-dropdown-header svg { width: 16px; height: 16px; color: var(--blue); flex-shrink: 0; }
+  .sidebar-dropdown-arrow { margin-left: auto; font-size: 9px; color: var(--blue); transition: transform 0.2s; }
+  .sidebar-dropdown.open .sidebar-dropdown-arrow { transform: rotate(180deg); }
+  .sidebar-dropdown-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+  .sidebar-dropdown.open .sidebar-dropdown-body { max-height: 500px; }
+  .sidebar-dropdown-link { padding: 7px 12px 7px 36px; font-size: 11.5px; color: var(--text-secondary); cursor: pointer; }
+  .sidebar-dropdown-link:hover { background: var(--blue-bg); color: var(--text-primary); }
+  .sidebar-dropdown-link:last-child { padding-bottom: 10px; }
+
+  /* ══════════════════════════════════════
+     MAIN
+     ══════════════════════════════════════ */
+  .main { flex: 1; padding: 20px 24px; background: var(--bg); min-width: 0; }
+
+  .home-tab {
+    display: inline-block; background: var(--text-secondary); color: #fff;
+    font-size: 11px; padding: 4px 12px; border-radius: 4px 4px 0 0;
+    margin-bottom: -1px; font-weight: 500;
+  }
+
+  /* 3컬럼 그리드 */
+  .card-row {
+    display: grid;
+    grid-template-columns: 370px 1fr 380px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  body.staff-mode .card-row { grid-template-columns: 370px 1fr; }
+  body.staff-mode .col-kpi { display: none; }
+
+  .col-center { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+  /* ══════════════════════════════════════
+     출퇴근 카드
+     ══════════════════════════════════════ */
+  .attendance-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
+
+  .attendance-date {
+    text-align: center; font-size: 16px; font-weight: 600;
+    margin-bottom: 18px; display: flex; align-items: center; justify-content: center; gap: 16px;
+  }
+  .attendance-date-arrow { color: var(--text-placeholder); cursor: pointer; font-size: 14px; }
+
+  .attendance-profile { display: flex; gap: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
+  .attendance-avatar { width: 60px; height: 60px; border-radius: 50%; background: #b8c8e8; flex-shrink: 0; }
+  .attendance-info { font-size: 11.5px; color: var(--text-tertiary); line-height: 1.7; }
+  .attendance-badge { display: inline-block; background: var(--green-bg); color: var(--green); font-size: 10px; padding: 2px 8px; border-radius: var(--radius-badge); font-weight: 600; margin-bottom: 2px; }
+  .attendance-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+
+  .attendance-times { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.8; }
+  .attendance-times strong { font-weight: 600; }
+
+  .attendance-bar-wrap { margin-bottom: 16px; }
+  .attendance-bar-label { text-align: center; font-size: 11.5px; color: var(--text-muted); margin-bottom: 5px; }
+  .attendance-bar { height: 12px; background: var(--border-subtle); border-radius: 6px; overflow: hidden; }
+  .attendance-bar-fill { height: 100%; background: var(--blue); border-radius: 6px; width: 6%; }
+  .attendance-bar-times { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-ghost); margin-top: 3px; }
+
+  .attendance-buttons { display: flex; gap: 10px; }
+  .btn-checkin { flex: 1; padding: 14px; border-radius: 10px; text-align: center; cursor: pointer; border: none; font-family: var(--font); }
+  .btn-checkin-done { background: #4a6fa5; color: #fff; }
+  .btn-checkin-done .check-icon { font-size: 13px; display: block; margin-bottom: 1px; }
+  .btn-checkin-done .check-date { font-size: 10.5px; font-weight: 500; opacity: 0.85; }
+  .btn-checkin-done .check-time { font-size: 20px; font-weight: 700; line-height: 1.2; }
+  .btn-checkin-done .check-scheduled { font-size: 10.5px; opacity: 0.7; }
+  .btn-checkout { background: var(--surface); border: 2px solid var(--border-light); color: var(--red); font-size: 14px; font-weight: 600; flex: 0.7; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+
+  .monthly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 24px; margin-top: 12px; }
+  .monthly-title { font-size: 13px; font-weight: 600; }
+  .monthly-title a { color: var(--blue); text-decoration: underline; }
+  .monthly-sub { font-size: 11.5px; color: var(--red); margin-top: 3px; }
+
+  /* ══════════════════════════════════════
+     DUC Hub 위젯
+     ══════════════════════════════════════ */
+  .hub-widget { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  .hub-header {
+    padding: 16px 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .hub-header-left { display: flex; align-items: center; gap: 9px; }
+  .hub-logo {
+    width: 26px; height: 26px; background: #1a1a16; border-radius: var(--radius-xs);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 10px; font-weight: 700;
+  }
+  .hub-title { font-size: 13px; font-weight: 700; letter-spacing: -0.02em; }
+  .hub-subtitle { font-size: 10px; color: var(--text-faint); margin-top: 1px; }
+
+  .hub-enter-btn {
+    font-size: 10.5px; color: var(--blue); font-weight: 600; cursor: pointer;
+    padding: 5px 12px; border: 1px solid var(--blue-border); border-radius: var(--radius-xs);
+    background: var(--blue-bg); transition: all 0.15s; text-decoration: none;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .hub-enter-btn:hover { background: var(--blue-lighter); border-color: var(--blue); }
+
+  .hub-services { padding: 14px 20px 10px; display: flex; gap: 10px; }
+  .hub-service-card {
+    flex: 1; border: 1px solid var(--border-light); border-radius: 7px;
+    padding: 12px 14px; cursor: pointer; transition: all 0.15s; background: var(--surface);
+  }
+  .hub-service-card:hover { border-color: #c8d8f0; background: #f8faff; }
+  .hub-service-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .hub-service-name { font-size: 12.5px; font-weight: 700; }
+  .hub-service-status { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: var(--radius-badge); background: var(--green-bg); color: var(--green); }
+  .hub-service-desc { font-size: 10.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; }
+  .hub-service-dynamic { display: flex; align-items: center; gap: 6px; padding-top: 7px; border-top: 1px solid var(--border-input); }
+  .hub-dynamic-num { font-size: 16px; font-weight: 700; color: var(--blue); line-height: 1; }
+  .hub-dynamic-label { font-size: 9.5px; color: var(--text-faint); line-height: 1.3; }
+  .hub-service-arrow { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-ghost); padding-top: 7px; border-top: 1px solid var(--border-input); }
+  .hub-service-card:hover .hub-service-arrow { color: var(--blue); }
+
+  .hub-upcoming { padding: 0 20px 14px; }
+  .hub-upcoming-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fafafa; border-radius: var(--radius-xs); }
+  .hub-upcoming-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-dim); }
+  .hub-upcoming-dot { width: 5px; height: 5px; border-radius: 50%; background: #ddd; }
+  .hub-upcoming-name { font-weight: 500; color: #777; }
+  .hub-upcoming-badge { font-size: 8.5px; font-weight: 600; color: var(--amber); background: var(--amber-bg); padding: 1px 5px; border-radius: var(--radius-badge); }
+  .hub-upcoming-sep { width: 1px; height: 12px; background: var(--border-light); }
+
+  .dynamic-only { display: flex; }
+  .static-only { display: none; }
+  body.static-mode .dynamic-only { display: none; }
+  body.static-mode .static-only { display: flex; }
+
+  /* ══════════════════════════════════════
+     사내 게시판 탭 위젯
+     ══════════════════════════════════════ */
+  .resource-widget {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
+  }
+
+  .resource-header { padding: 14px 20px 0; display: flex; align-items: center; gap: 8px; }
+  .resource-header-icon { width: 22px; height: 22px; border-radius: var(--radius-xs); background: var(--blue-bg3); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .resource-header-title { font-size: 13px; font-weight: 700; }
+
+  .resource-tabs { display: flex; gap: 0; padding: 12px 20px 0; border-bottom: 1px solid var(--border-light); }
+  .resource-tab {
+    padding: 8px 14px; font-size: 11.5px; font-weight: 500; color: var(--text-dim);
+    cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap;
+  }
+  .resource-tab:hover { color: var(--text-tertiary); }
+  .resource-tab.active { color: var(--text-primary); font-weight: 600; border-bottom-color: var(--blue); }
+
+  .resource-content { padding: 14px 20px; flex: 1; overflow-y: auto; }
+  .resource-panel { display: none; }
+  .resource-panel.active { display: block; }
+
+  .res-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 4px; border-bottom: 1px solid #f5f5f5;
+    cursor: pointer; border-radius: 4px; transition: background 0.1s;
+  }
+  .res-item:hover { background: #f8f9fc; }
+  .res-item:last-child { border-bottom: none; }
+
+  .res-icon { width: 28px; height: 28px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .res-icon-notice { background: var(--amber-bg2); }
+  .res-icon-policy { background: var(--green-bg); }
+  .res-icon-welfare { background: var(--red-bg); }
+  .res-icon-doc { background: var(--doc-bg); }
+
+  .res-text { flex: 1; min-width: 0; }
+  .res-title { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .res-meta { font-size: 10px; color: var(--text-ghost); margin-top: 1px; }
+
+  .res-badge-new { font-size: 8px; font-weight: 700; color: #fff; background: var(--red); padding: 1px 5px; border-radius: var(--radius-badge); flex-shrink: 0; line-height: 1.5; }
+  .res-badge-pin { font-size: 8px; font-weight: 600; color: var(--blue); background: var(--blue-bg2); padding: 1px 5px; border-radius: var(--radius-badge); flex-shrink: 0; line-height: 1.5; }
+
+  .res-arrow { font-size: 11px; color: #ddd; flex-shrink: 0; }
+  .res-item:hover .res-arrow { color: var(--blue); }
+
+  .res-more { padding: 10px 20px; border-top: 1px solid var(--border-subtle); text-align: center; }
+  .res-more a { font-size: 10.5px; color: var(--blue); text-decoration: none; font-weight: 500; }
+  .res-more a:hover { text-decoration: underline; }
+
+  /* ══════════════════════════════════════
+     회사 현황 (임원용)
+     ══════════════════════════════════════ */
+  .kpi-widget { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  .kpi-header {
+    padding: 14px 20px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .kpi-header-left { display: flex; align-items: center; gap: 8px; }
+  .kpi-header-icon { width: 22px; height: 22px; border-radius: var(--radius-xs); background: var(--blue-bg3); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .kpi-header-title { font-size: 13px; font-weight: 700; }
+  .kpi-header-date { font-size: 9.5px; color: var(--text-ghost); }
+  .kpi-header-period { font-size: 9.5px; color: var(--text-dim); background: var(--bg); padding: 3px 9px; border-radius: 4px; }
+  .kpi-exec-badge { font-size: 8px; font-weight: 600; color: var(--amber-dark); background: var(--amber-bg); padding: 2px 6px; border-radius: var(--radius-badge); margin-left: 6px; }
+
+  .kpi-numbers { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-subtle); }
+  .kpi-num-cell { padding: 14px 16px 12px; text-align: center; border-right: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+  .kpi-num-cell:nth-child(2n) { border-right: none; }
+  .kpi-num-cell:nth-child(n+3) { border-bottom: none; }
+  .kpi-num-value { font-size: 18px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .kpi-num-value.blue { color: var(--blue); }
+  .kpi-num-value.negative { color: var(--red); }
+  .kpi-num-label { font-size: 9.5px; color: var(--text-dim); }
+  .kpi-num-delta { font-size: 8.5px; margin-top: 2px; font-weight: 500; }
+  .delta-up { color: var(--green); }
+  .delta-down { color: var(--red); }
+
+  .kpi-charts { display: grid; grid-template-columns: 1fr 1fr; }
+  .kpi-chart-cell { padding: 14px 16px; border-right: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+  .kpi-chart-cell:nth-child(2n) { border-right: none; }
+  .kpi-chart-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .kpi-chart-title { font-size: 10.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .kpi-chart-value-inline { font-weight: 700; color: var(--text-primary); font-size: 11px; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 44px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .bar-fill { width: 100%; border-radius: 2px 2px 0 0; min-height: 2px; }
+  .bar-label { font-size: 7.5px; color: var(--text-placeholder); }
+
+  .donut-wrap { display: flex; align-items: center; gap: 10px; }
+  .donut-chart { width: 46px; height: 46px; flex-shrink: 0; position: relative; }
+  .donut-chart svg { width: 46px; height: 46px; transform: rotate(-90deg); }
+  .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8.5px; font-weight: 700; }
+  .donut-legend { display: flex; flex-direction: column; gap: 3px; }
+  .donut-legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #777; }
+  .donut-legend-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+  .sparkline-wrap { height: 44px; }
+  .sparkline-wrap svg { width: 100%; height: 40px; }
+
+  .h-bars { display: flex; flex-direction: column; gap: 5px; }
+  .h-bar-row { display: flex; align-items: center; gap: 6px; }
+  .h-bar-label { font-size: 9px; color: var(--text-muted); width: 48px; text-align: right; flex-shrink: 0; }
+  .h-bar-track { flex: 1; height: 8px; background: var(--border-input); border-radius: 4px; overflow: hidden; }
+  .h-bar-fill { height: 100%; border-radius: 4px; }
+  .h-bar-value { font-size: 8.5px; color: var(--text-dim); width: 26px; flex-shrink: 0; }
+
+  .kpi-footer { padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; background: #fafafa; }
+  .kpi-footer-note { font-size: 9px; color: var(--text-ghost); }
+  .kpi-footer-link { font-size: 10px; color: var(--blue); text-decoration: none; font-weight: 500; cursor: pointer; }
+  .kpi-footer-link:hover { text-decoration: underline; }
+
+  /* ══════════════════════════════════════
+     컨트롤 패널 (데모용 — 실제 배포 시 권한 시스템으로 대체)
+     ══════════════════════════════════════ */
+  .control-panel {
+    position: fixed; bottom: 20px; right: 20px;
+    display: flex; gap: 6px; z-index: 100;
+    background: var(--surface); padding: 8px 12px; border-radius: 10px;
+    border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .ctrl-group { display: flex; align-items: center; gap: 4px; }
+  .ctrl-label { font-size: 9.5px; color: var(--text-dim); margin-right: 4px; white-space: nowrap; }
+  .ctrl-sep { width: 1px; height: 20px; background: var(--border-light); margin: 0 6px; }
+  .ctrl-btn {
+    padding: 6px 12px; border: 1px solid #ddd; border-radius: var(--radius-sm);
+    font-size: 10.5px; font-family: var(--font); cursor: pointer;
+    background: var(--surface); color: var(--text-tertiary); font-weight: 500; transition: all 0.15s;
+  }
+  .ctrl-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+  .ctrl-btn:hover:not(.active) { border-color: var(--text-dim); }
+
+  /* 데모 안내 배너 */
+  .demo-banner {
+    position: fixed; top: 58px; left: 50%; transform: translateX(-50%);
+    background: #1a1a16; color: #fff; padding: 6px 20px; border-radius: 0 0 8px 8px;
+    font-size: 10.5px; z-index: 100; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .demo-banner-dot { width: 6px; height: 6px; border-radius: 50%; background: #4caf76; animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+</style>
+</head>
+<body>
+
+<!-- 데모 안내 -->
+<div class="demo-banner">
+  <span class="demo-banner-dot"></span>
+  인트라넷 목업 데모 · 아래 토글로 임원/직원 뷰 전환
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" fill="#4CAF50" opacity="0.15"/>
+        <path d="M8 20 L12 12 L16 18 L20 10 L24 20" stroke="#4CAF50" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="topbar-logo-text">DOUBLEU GAMES</span>
+    </div>
+    <span class="topbar-hamburger">☰</span>
+    <span class="topbar-search">🔍</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-icon">🔔</div>
+    <div class="topbar-icon">📋</div>
+    <div class="topbar-icon">⊞</div>
+    <div class="topbar-avatar"></div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-role"><span>🏢</span> 부서장(ManagementService)</div>
+    <div class="sidebar-section">
+      <div class="sidebar-header active">
+        <span class="sidebar-header-icon">⭐</span>직원(SelfService)<span class="sidebar-header-arrow">∧</span>
+      </div>
+      <div>
+        <div class="sidebar-sub-item">📋 전자결재</div>
+        <div class="sidebar-sub-item">📝 근태신청/현황</div>
+        <div class="sidebar-sub-item">👤 인사신청</div>
+        <div class="sidebar-sub-item">⚙️ 인사정보</div>
+        <div class="sidebar-sub-item">🎁 보상</div>
+        <div class="sidebar-sub-item">📊 연말정산</div>
+        <div class="sidebar-sub-item">📁 평가</div>
+      </div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-dropdown open">
+      <div class="sidebar-dropdown-header" onclick="this.parentElement.classList.toggle('open')">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        더블유 게임즈 그룹웨어
+        <span class="sidebar-dropdown-arrow">▾</span>
+      </div>
+      <div class="sidebar-dropdown-body">
+        <div class="sidebar-dropdown-link">더블유 카지노 홈페이지</div>
+        <div class="sidebar-dropdown-link">더블유 카지노 홈페이지 DEV</div>
+        <div class="sidebar-dropdown-link">더블유 카지노 어드민</div>
+        <div class="sidebar-dropdown-link">드롭박스</div>
+        <div class="sidebar-dropdown-link">비즈 플레이</div>
+        <div class="sidebar-dropdown-link">조직도</div>
+        <div class="sidebar-dropdown-link">좌석 배치도</div>
+        <div class="sidebar-dropdown-link">회의실 예약</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="home-tab">Home</div>
+    <div class="card-row">
+
+      <!-- ── COL 1: 출퇴근 ── -->
+      <div class="col-left">
+        <div class="attendance-card">
+          <div class="attendance-date"><span class="attendance-date-arrow">‹</span>02/27(금)<span class="attendance-date-arrow">›</span></div>
+          <div class="attendance-profile">
+            <div class="attendance-avatar"></div>
+            <div class="attendance-info">
+              <span class="attendance-badge">근무일</span><br>
+              <span class="attendance-name">장혜진</span><br>
+              사업관리본부 브랜드디자인팀 - 본사<br>
+              자율출퇴근*/09:30-18:30 출근
+            </div>
+          </div>
+          <div class="attendance-times"><strong>출근시간 :</strong> 09:30 / 09:30<br><strong>퇴근시간 :</strong> — / 18:30</div>
+          <div class="attendance-bar-wrap">
+            <div class="attendance-bar-label">0H 31m (6%)</div>
+            <div class="attendance-bar"><div class="attendance-bar-fill"></div></div>
+            <div class="attendance-bar-times"><span>09:30</span><span>18:30</span></div>
+          </div>
+          <div class="attendance-buttons">
+            <div class="btn-checkin btn-checkin-done">
+              <span class="check-icon">✓</span><span class="check-date">02/27 출근</span>
+              <span class="check-time">09:26</span><span class="check-scheduled">(09:30)</span>
+            </div>
+            <div class="btn-checkin btn-checkout">퇴근</div>
+          </div>
+        </div>
+        <div class="monthly-card">
+          <div class="monthly-title">월간근무(체류) <a href="#">140시간 14분</a> ···</div>
+          <div class="monthly-sub">소정근로 136</div>
+        </div>
+      </div>
+
+      <!-- ── COL 2: DUC Hub + 사내 게시판 ── -->
+      <div class="col-center">
+        <div class="hub-widget">
+          <div class="hub-header">
+            <div class="hub-header-left">
+              <div class="hub-logo">H</div>
+              <div><div class="hub-title">DUC Hub</div><div class="hub-subtitle">내부 AI 플랫폼</div></div>
+            </div>
+            <a class="hub-enter-btn" href="#">허브 열기 <span style="font-size:11px;">→</span></a>
+          </div>
+          <div class="hub-services">
+            <div class="hub-service-card">
+              <div class="hub-service-card-top"><span class="hub-service-name">Build Log</span><span class="hub-service-status">운영중</span></div>
+              <div class="hub-service-desc">시도한 것, 배운 것이 쌓이는 곳</div>
+              <div class="hub-service-dynamic dynamic-only"><div class="hub-dynamic-num">47</div><div class="hub-dynamic-label">이번 달 글<br><span style="color:var(--blue);">+3 신규</span></div></div>
+              <div class="hub-service-arrow static-only">바로가기 →</div>
+            </div>
+            <div class="hub-service-card">
+              <div class="hub-service-card-top"><span class="hub-service-name">AI Gateway</span><span class="hub-service-status">운영중</span></div>
+              <div class="hub-service-desc">AI 툴 신청 · 승인 · 비용 관리</div>
+              <div class="hub-service-dynamic dynamic-only"><div class="hub-dynamic-num" style="color:#e08800;">1</div><div class="hub-dynamic-label">승인 대기<br><span style="color:#e08800;">내 요청</span></div></div>
+              <div class="hub-service-arrow static-only">바로가기 →</div>
+            </div>
+          </div>
+          <div class="hub-upcoming">
+            <div class="hub-upcoming-row">
+              <div class="hub-upcoming-item"><span class="hub-upcoming-dot"></span><span class="hub-upcoming-name">기여 대시보드</span><span class="hub-upcoming-badge">Q3</span></div>
+              <div class="hub-upcoming-sep"></div>
+              <div class="hub-upcoming-item"><span class="hub-upcoming-dot"></span><span class="hub-upcoming-name">Mini Lab</span><span class="hub-upcoming-badge">Q3</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 사내 게시판 -->
+        <div class="resource-widget">
+          <div class="resource-header"><div class="resource-header-icon">📂</div><span class="resource-header-title">사내 게시판</span></div>
+          <div class="resource-tabs">
+            <div class="resource-tab active" data-tab="notice" onclick="switchTab(this)">전사 공지</div>
+            <div class="resource-tab" data-tab="policy" onclick="switchTab(this)">공통 정책</div>
+            <div class="resource-tab" data-tab="welfare" onclick="switchTab(this)">복지 안내</div>
+            <div class="resource-tab" data-tab="docs" onclick="switchTab(this)">주요 문서</div>
+          </div>
+          <div class="resource-content">
+            <div class="resource-panel active" id="panel-notice">
+              <div class="res-item"><div class="res-icon res-icon-notice">📢</div><div class="res-text"><div class="res-title">3월 전사 타운홀 미팅 일정 안내</div><div class="res-meta">경영지원팀 · 오늘</div></div><span class="res-badge-new">NEW</span><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-notice">📢</div><div class="res-text"><div class="res-title">2026 상반기 보안 교육 필수 이수 안내</div><div class="res-meta">정보보안팀 · 1일 전</div></div><span class="res-badge-new">NEW</span><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-notice">📢</div><div class="res-text"><div class="res-title">사무실 좌석 재배치 일정 (3/10~)</div><div class="res-meta">총무팀 · 3일 전</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-notice">📢</div><div class="res-text"><div class="res-title">AI 활용 가이드라인 v2.0 배포</div><div class="res-meta">DUC Hub TF · 5일 전</div></div><span class="res-badge-pin">고정</span><span class="res-arrow">›</span></div>
+            </div>
+            <div class="resource-panel" id="panel-policy">
+              <div class="res-item"><div class="res-icon res-icon-policy">📋</div><div class="res-text"><div class="res-title">재택근무 운영 기준 (2026 개정)</div><div class="res-meta">인사팀 · 상시</div></div><span class="res-badge-pin">고정</span><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-policy">📋</div><div class="res-text"><div class="res-title">경비 처리 및 법인카드 사용 규정</div><div class="res-meta">경영지원팀 · 상시</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-policy">📋</div><div class="res-text"><div class="res-title">출장 신청·정산 프로세스</div><div class="res-meta">경영지원팀 · 상시</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-policy">📋</div><div class="res-text"><div class="res-title">개인정보 처리 방침 (사내용)</div><div class="res-meta">정보보안팀 · 상시</div></div><span class="res-arrow">›</span></div>
+            </div>
+            <div class="resource-panel" id="panel-welfare">
+              <div class="res-item"><div class="res-icon res-icon-welfare">🎁</div><div class="res-text"><div class="res-title">2026 선택적 복리후생 포인트 안내</div><div class="res-meta">인사팀 · 상시</div></div><span class="res-badge-pin">고정</span><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-welfare">🎁</div><div class="res-text"><div class="res-title">건강검진 예약 방법 및 제휴 병원</div><div class="res-meta">총무팀 · 상시</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-welfare">🎁</div><div class="res-text"><div class="res-title">자기계발비 신청 가이드</div><div class="res-meta">인사팀 · 상시</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-welfare">🎁</div><div class="res-text"><div class="res-title">경조사 지원 및 휴가 규정</div><div class="res-meta">인사팀 · 상시</div></div><span class="res-arrow">›</span></div>
+            </div>
+            <div class="resource-panel" id="panel-docs">
+              <div class="res-item"><div class="res-icon res-icon-doc">📄</div><div class="res-text"><div class="res-title">2026 전사 OKR 요약</div><div class="res-meta">전략기획팀 · Q1 배포</div></div><span class="res-badge-pin">고정</span><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-doc">📄</div><div class="res-text"><div class="res-title">브랜드 가이드라인 (로고, 컬러, 서체)</div><div class="res-meta">브랜드디자인팀 · 상시</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-doc">📄</div><div class="res-text"><div class="res-title">신규 입사자 온보딩 체크리스트</div><div class="res-meta">인사팀 · 상시</div></div><span class="res-arrow">›</span></div>
+              <div class="res-item"><div class="res-icon res-icon-doc">📄</div><div class="res-text"><div class="res-title">사내 시스템 계정 신청 가이드</div><div class="res-meta">IT지원팀 · 상시</div></div><span class="res-arrow">›</span></div>
+            </div>
+          </div>
+          <div class="res-more"><a href="#">전체 보기 →</a></div>
+        </div>
+      </div>
+
+      <!-- ── COL 3: 회사 현황 (임원) ── -->
+      <div class="col-kpi">
+        <div class="kpi-widget">
+          <div class="kpi-header">
+            <div class="kpi-header-left">
+              <div class="kpi-header-icon">📊</div>
+              <div><div class="kpi-header-title">회사 현황<span class="kpi-exec-badge">임원</span></div><div class="kpi-header-date">2026.02.27 기준</div></div>
+            </div>
+            <div class="kpi-header-period">최근 7일</div>
+          </div>
+          <div class="kpi-numbers">
+            <div class="kpi-num-cell"><div class="kpi-num-value">842K</div><div class="kpi-num-label">DAU</div><div class="kpi-num-delta delta-up">▲ 2.3%</div></div>
+            <div class="kpi-num-cell"><div class="kpi-num-value blue">$1.82M</div><div class="kpi-num-label">일 매출</div><div class="kpi-num-delta delta-up">▲ 5.1%</div></div>
+            <div class="kpi-num-cell"><div class="kpi-num-value">$2.16</div><div class="kpi-num-label">ARPU</div><div class="kpi-num-delta delta-up">▲ 0.8%</div></div>
+            <div class="kpi-num-cell"><div class="kpi-num-value negative">-1.2%</div><div class="kpi-num-label">D7 리텐션 변동</div><div class="kpi-num-delta delta-down">▼ vs 지난달</div></div>
+          </div>
+          <div class="kpi-charts">
+            <div class="kpi-chart-cell">
+              <div class="kpi-chart-title">DAU 7일<span class="kpi-chart-value-inline" style="color:var(--green);">↗</span></div>
+              <div class="bar-chart">
+                <div class="bar-col"><div class="bar-fill" style="height:65%;background:var(--blue-light);"></div><span class="bar-label">월</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height:58%;background:var(--blue-light);"></div><span class="bar-label">화</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height:72%;background:var(--blue-light);"></div><span class="bar-label">수</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height:68%;background:var(--blue-light);"></div><span class="bar-label">목</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height:80%;background:var(--blue-light);"></div><span class="bar-label">금</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height:95%;background:var(--blue-mid);"></div><span class="bar-label">토</span></div>
+                <div class="bar-col"><div class="bar-fill" style="height:100%;background:var(--blue);"></div><span class="bar-label">일</span></div>
+              </div>
+            </div>
+            <div class="kpi-chart-cell">
+              <div class="kpi-chart-title">플랫폼 매출 비중</div>
+              <div class="donut-wrap">
+                <div class="donut-chart">
+                  <svg viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--blue)" stroke-width="4" stroke-dasharray="52 48" stroke-dashoffset="0"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--blue-mid)" stroke-width="4" stroke-dasharray="28 72" stroke-dashoffset="-52"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--blue-light)" stroke-width="4" stroke-dasharray="14 86" stroke-dashoffset="-80"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f0f0f0" stroke-width="4" stroke-dasharray="6 94" stroke-dashoffset="-94"/>
+                  </svg>
+                  <div class="donut-center">$1.82M</div>
+                </div>
+                <div class="donut-legend">
+                  <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--blue);"></span>iOS 52%</div>
+                  <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--blue-mid);"></span>And 28%</div>
+                  <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--blue-light);"></span>Web 14%</div>
+                  <div class="donut-legend-item"><span class="donut-legend-dot" style="background:#e8e8e8;"></span>FB 6%</div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-chart-cell">
+              <div class="kpi-chart-title">ARPU 30일<span class="kpi-chart-value-inline">$2.16</span></div>
+              <div class="sparkline-wrap">
+                <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                  <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--blue)" stop-opacity="0.12"/><stop offset="100%" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M0,32 L7,30 14,31 21,28 28,29 35,25 42,27 49,23 56,25 63,22 70,24 77,20 84,21 91,19 98,17 105,20 112,16 119,18 126,14 133,15 140,13 147,16 154,11 161,12 168,9 175,10 182,7 189,8 196,5 200,5 L200,40 L0,40 Z" fill="url(#sg)"/>
+                  <path d="M0,32 L7,30 14,31 21,28 28,29 35,25 42,27 49,23 56,25 63,22 70,24 77,20 84,21 91,19 98,17 105,20 112,16 119,18 126,14 133,15 140,13 147,16 154,11 161,12 168,9 175,10 182,7 189,8 196,5" fill="none" stroke="var(--blue)" stroke-width="1.5"/>
+                  <circle cx="196" cy="5" r="2" fill="var(--blue)"/>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-chart-cell">
+              <div class="kpi-chart-title">유저 Tier 분포</div>
+              <div class="h-bars">
+                <div class="h-bar-row"><div class="h-bar-label">Chairman</div><div class="h-bar-track"><div class="h-bar-fill" style="width:8%;background:var(--blue);"></div></div><div class="h-bar-value">8%</div></div>
+                <div class="h-bar-row"><div class="h-bar-label">Platinum</div><div class="h-bar-track"><div class="h-bar-fill" style="width:15%;background:var(--blue-mid);"></div></div><div class="h-bar-value">15%</div></div>
+                <div class="h-bar-row"><div class="h-bar-label">Silver</div><div class="h-bar-track"><div class="h-bar-fill" style="width:32%;background:var(--blue-light);"></div></div><div class="h-bar-value">32%</div></div>
+                <div class="h-bar-row"><div class="h-bar-label">Bronze</div><div class="h-bar-track"><div class="h-bar-fill" style="width:45%;background:#e8e8e8;"></div></div><div class="h-bar-value">45%</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-footer"><span class="kpi-footer-note">어드민 대시보드 연동 (예시)</span><a class="kpi-footer-link" href="#">상세 보기 →</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 컨트롤 패널 -->
+<div class="control-panel">
+  <div class="ctrl-group">
+    <span class="ctrl-label">권한</span>
+    <button class="ctrl-btn active" id="btn-exec" onclick="setRole('exec')">임원</button>
+    <button class="ctrl-btn" id="btn-staff" onclick="setRole('staff')">직원</button>
+  </div>
+  <div class="ctrl-sep"></div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Hub</span>
+    <button class="ctrl-btn active" id="btn-dynamic" onclick="setMode('dynamic')">동적</button>
+    <button class="ctrl-btn" id="btn-static" onclick="setMode('static')">정적</button>
+  </div>
+</div>
+
+<script>
+function switchTab(el){
+  document.querySelectorAll('.resource-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.resource-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+el.dataset.tab).classList.add('active');
+}
+function setRole(r){
+  document.body.classList.toggle('staff-mode',r==='staff');
+  document.getElementById('btn-staff').classList.toggle('active',r==='staff');
+  document.getElementById('btn-exec').classList.toggle('active',r==='exec');
+}
+function setMode(m){
+  document.body.classList.toggle('static-mode',m==='static');
+  document.getElementById('btn-static').classList.toggle('active',m==='static');
+  document.getElementById('btn-dynamic').classList.toggle('active',m==='dynamic');
+}
+</script>
+
+</body>
+</html>
