@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUC Hub — Build Log</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#f5f5f5;--s1:#ffffff;--s2:#f8f8fa;--s3:#eeeef2;--s4:#e4e4ec;
+  --bd:#e0e0e0;--bd2:#d8d8e0;--bd3:#c8c8d4;
+  --t1:#1a1a2e;--t2:#5a5a78;--t3:#9090a8;
+  --green:#00995a;--green-d:#00995a12;
+  --blue:#3a6fff;--blue-d:#3a6fff12;
+  --amber:#cc8800;--amber-d:#cc880012;
+  --cyan:#0088cc;--cyan-d:#0088cc12;
+  --purple:#7744dd;--purple-d:#7744dd12;
+  --red:#dd3344;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--t1);font-family:'Noto Sans KR',sans-serif;font-weight:300;min-height:100vh;font-size:13px;}
+
+.topbar{background:var(--s1);border-bottom:1px solid var(--bd2);height:48px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;}
+.tb-logo{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;letter-spacing:0.06em;margin-right:12px;}
+.tb-sep{color:var(--t3);margin:0 6px;}
+.tb-page{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+
+/* SEARCH BAR */
+.search-bar{background:var(--s2);border-bottom:1px solid var(--bd);padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.search-input{
+  flex:1;background:var(--s1);border:1px solid var(--bd2);
+  padding:9px 16px 9px 40px;font-size:13px;color:var(--t1);
+  font-family:'Noto Sans KR',sans-serif;outline:none;
+  transition:border-color .15s;position:relative;
+}
+.search-input:focus{border-color:var(--green);}
+.search-wrap{flex:1;position:relative;}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none;}
+.search-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);}
+
+/* CATEGORY TABS */
+.cat-bar{background:var(--s1);border-bottom:1px solid var(--bd);display:flex;padding:0 20px;gap:0;overflow-x:auto;}
+.cat-tab{
+  padding:0 16px;height:44px;display:flex;align-items:center;gap:7px;
+  font-size:12px;color:var(--t3);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;
+}
+.cat-tab:hover{color:var(--t2);}
+.cat-tab.active{color:var(--t1);border-bottom-color:var(--t1);}
+.cat-tab .ct-emoji{font-size:14px;}
+.cat-tab .ct-count{font-family:'DM Mono',monospace;font-size:9px;background:var(--s3);padding:1px 6px;border-radius:8px;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 280px;gap:0;min-height:calc(100vh - 96px);}
+
+/* FEED */
+.feed{padding:20px 24px;border-right:1px solid var(--bd);}
+
+/* POST CARD */
+.post{background:var(--s1);border:1px solid var(--bd2);margin-bottom:12px;transition:border-color .12s;cursor:pointer;}
+.post:hover{border-color:var(--bd3);}
+.post-header{padding:14px 16px 0;display:flex;align-items:flex-start;gap:12px;}
+.post-cat{font-size:18px;flex-shrink:0;}
+.post-meta{flex:1;}
+.post-cat-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;margin-bottom:4px;}
+.post-title{font-size:14px;font-weight:700;line-height:1.4;margin-bottom:4px;color:var(--t1);}
+.post-author{font-size:11px;color:var(--t3);}
+.post-body{padding:10px 16px 14px 46px;}
+.post-excerpt{font-size:12px;color:var(--t2);line-height:1.75;}
+.post-footer{padding:10px 16px 12px 46px;border-top:1px solid var(--bd);display:flex;align-items:center;gap:12px;}
+.post-reaction{font-size:11px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:4px;}
+.post-reaction:hover{color:var(--t2);}
+.post-views{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-left:auto;}
+.post-badge{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;margin-left:auto;}
+.pb-pick{background:var(--amber-d);color:var(--amber);}
+
+/* WRITE BTN */
+.write-btn{
+  width:100%;background:var(--green);color:var(--bg);border:none;
+  padding:11px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;
+  cursor:pointer;margin-bottom:16px;transition:all .12s;
+}
+.write-btn:hover{background:#44ffaa;}
+
+/* SIDEBAR */
+.sidebar{padding:20px;overflow-y:auto;}
+
+/* STATS BOX */
+.stats-box{background:var(--s1);border:1px solid var(--bd2);padding:16px;margin-bottom:14px;}
+.sb-title{font-size:11px;font-weight:700;margin-bottom:12px;color:var(--t1);}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bd);font-size:11px;}
+.stat-row:last-child{border:none;}
+.stat-row-l{color:var(--t2);}
+.stat-row-v{font-family:'DM Mono',monospace;color:var(--green);}
+
+/* PICK SECTION */
+.pick-section{background:var(--s1);border:1px solid var(--bd2);padding:14px;margin-bottom:14px;}
+.pick-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:0.12em;margin-bottom:10px;}
+.pick-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer;}
+.pick-item:last-child{border:none;}
+.pick-rank{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);width:16px;flex-shrink:0;}
+.pick-info{}
+.pick-name{font-size:12px;color:var(--t1);line-height:1.4;margin-bottom:2px;}
+.pick-author{font-size:10px;color:var(--t3);}
+
+/* INCENTIVE */
+.incentive-box{background:var(--amber-d);border:1px solid var(--amber)33;padding:14px;margin-bottom:14px;}
+.ib-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:0.1em;margin-bottom:8px;}
+.ib-text{font-size:11px;color:var(--t2);line-height:1.7;}
+.ib-cta{
+  width:100%;background:var(--amber);color:var(--bg);border:none;
+  padding:8px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
+  cursor:pointer;margin-top:10px;
+}
+
+/* WRITE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--bd3);padding:28px;width:640px;max-width:95vw;max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:18px;font-weight:900;margin-bottom:6px;}
+.modal-sub{font-size:12px;color:var(--t2);margin-bottom:22px;}
+.cat-pick-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+.cat-pick{background:var(--s2);border:1px solid var(--bd2);padding:10px 8px;text-align:center;cursor:pointer;transition:all .12s;}
+.cat-pick:hover{border-color:var(--bd3);}
+.cat-pick.selected{border-color:var(--green);background:var(--green-d);}
+.cat-pick-emoji{font-size:20px;margin-bottom:4px;}
+.cat-pick-label{font-size:10px;color:var(--t2);line-height:1.4;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;color:var(--t2);margin-bottom:6px;display:block;}
+.form-input{width:100%;background:var(--s2);border:1px solid var(--bd2);padding:9px 12px;font-size:13px;color:var(--t1);font-family:'Noto Sans KR',sans-serif;outline:none;}
+.form-input:focus{border-color:var(--green);}
+.form-textarea{width:100%;background:var(--s2);border:1px solid var(--bd2);padding:10px 12px;font-size:12px;color:var(--t1);font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;min-height:120px;}
+.form-textarea:focus{border-color:var(--green);}
+.form-note{font-size:10px;color:var(--t3);margin-top:4px;line-height:1.6;}
+.modal-actions{display:flex;gap:8px;margin-top:20px;}
+.btn-submit{flex:1;background:var(--green);color:var(--bg);border:none;padding:11px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;}
+.btn-cancel{background:transparent;color:var(--t3);border:1px solid var(--bd2);padding:11px 20px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;}
+
+/* AI SEARCH RESULTS */
+.ai-results{background:var(--s2);border:1px solid var(--green)33;padding:16px;margin-bottom:16px;display:none;}
+.air-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:0.12em;margin-bottom:10px;}
+.air-item{padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer;}
+.air-item:last-child{border:none;}
+.air-title{font-size:12px;color:var(--t1);margin-bottom:3px;}
+.air-meta{font-size:10px;color:var(--t3);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-logo"><a href="index.html" style="color:inherit;text-decoration:none;">DUC HUB</a></div>
+  <div class="tb-sep">/</div>
+  <div class="tb-page">BUILD LOG</div>
+  <div class="tb-right">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);">47건 이번달 · 활성 28명</div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-bar">
+  <div class="search-wrap">
+    <div class="search-icon">🔍</div>
+    <input class="search-input" id="search-inp" placeholder="AI 검색 — 슬롯 게임 UX 개선, 포인터 이벤트 A/B 테스트..." oninput="onSearch(this.value)" onkeydown="if(event.key==='Enter')runSearch()">
+  </div>
+  <div class="search-hint">Enter로 검색 · AI가 관련 글을 찾아줍니다</div>
+</div>
+
+<!-- AI SEARCH RESULTS -->
+<div id="ai-results" class="ai-results" style="margin:0;border-radius:0;border-left:none;border-right:none;">
+  <div class="air-label">🤖 AI 검색 결과</div>
+  <div id="air-items"></div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="cat-bar">
+  <div class="cat-tab active" onclick="setCat(this)">
+    <span class="ct-emoji">🗂</span>전체<span class="ct-count">47</span>
+  </div>
+  <div class="cat-tab" onclick="setCat(this)">
+    <span class="ct-emoji">🛠</span>실무 노하우<span class="ct-count">14</span>
+  </div>
+  <div class="cat-tab" onclick="setCat(this)">
+    <span class="ct-emoji">🤖</span>AI 활용<span class="ct-count">11</span>
+  </div>
+  <div class="cat-tab" onclick="setCat(this)">
+    <span class="ct-emoji">🔬</span>시도한 것<span class="ct-count">9</span>
+  </div>
+  <div class="cat-tab" onclick="setCat(this)">
+    <span class="ct-emoji">📊</span>게임 인사이트<span class="ct-count">8</span>
+  </div>
+  <div class="cat-tab" onclick="setCat(this)">
+    <span class="ct-emoji">💬</span>아이디어<span class="ct-count">5</span>
+  </div>
+</div>
+
+<div class="layout">
+<!-- FEED -->
+<div class="feed">
+  <button class="write-btn" onclick="openWrite()">✍ 알고 있는 것을 남긴다</button>
+
+  <div class="post" onclick="openPost()">
+    <div class="post-header">
+      <div class="post-cat">🤖</div>
+      <div class="post-meta">
+        <div class="post-cat-tag" style="color:var(--blue)">AI 활용</div>
+        <div class="post-title">Claude로 게임 기획서 초안 짜는 법 — 프롬프트 템플릿 공유</div>
+        <div class="post-author">[브랜드디자인] · 3일 전</div>
+      </div>
+      <div class="post-badge pb-pick">이달의 픽 🏆</div>
+    </div>
+    <div class="post-body">
+      <div class="post-excerpt">기획서를 처음부터 쓰는 게 아니라 AI에게 구조를 잡게 하고 내가 판단만 하는 방식으로 바꿨더니 속도가 3배 빨라졌다. 핵심은 '출력 형식'을 미리 정해주는 것...</div>
+    </div>
+    <div class="post-footer">
+      <span class="post-reaction">👍 24</span>
+      <span class="post-reaction">💡 12</span>
+      <span class="post-reaction">🔖 18</span>
+      <div class="post-views">조회 203</div>
+    </div>
+  </div>
+
+  <div class="post" onclick="openPost()">
+    <div class="post-header">
+      <div class="post-cat">🔬</div>
+      <div class="post-meta">
+        <div class="post-cat-tag" style="color:var(--purple)">시도한 것</div>
+        <div class="post-title">포커 게임에 데일리 미션 넣었다가 실패한 이유</div>
+        <div class="post-author">[플랫폼] · 1주 전</div>
+      </div>
+    </div>
+    <div class="post-body">
+      <div class="post-excerpt">처음엔 DAU가 올라갔다. 근데 2주 후에 D7 리텐션이 오히려 떨어졌다. 미션이 너무 쉬워서 보상 감각이 무뎌진 것 같다. 다음엔 이렇게 바꿀 것...</div>
+    </div>
+    <div class="post-footer">
+      <span class="post-reaction">👍 17</span>
+      <span class="post-reaction">💡 8</span>
+      <span class="post-reaction">🔖 22</span>
+      <div class="post-views">조회 156</div>
+    </div>
+  </div>
+
+  <div class="post" onclick="openPost()">
+    <div class="post-header">
+      <div class="post-cat">🛠</div>
+      <div class="post-meta">
+        <div class="post-cat-tag" style="color:var(--green)">실무 노하우</div>
+        <div class="post-title">Figma → Unity 에셋 넘길 때 네이밍 컨벤션 — 우리 팀 기준</div>
+        <div class="post-author">[브랜드디자인] · 2주 전</div>
+      </div>
+    </div>
+    <div class="post-body">
+      <div class="post-excerpt">매번 개발팀이랑 에셋 파일명 때문에 트러블이 났는데, 아래 규칙 적용한 이후로 커뮤니케이션이 절반으로 줄었다. prefix_type_state 형식으로 통일...</div>
+    </div>
+    <div class="post-footer">
+      <span class="post-reaction">👍 31</span>
+      <span class="post-reaction">💡 5</span>
+      <span class="post-reaction">🔖 29</span>
+      <div class="post-views">조회 341</div>
+    </div>
+  </div>
+
+  <div class="post" onclick="openPost()">
+    <div class="post-header">
+      <div class="post-cat">📊</div>
+      <div class="post-meta">
+        <div class="post-cat-tag" style="color:var(--amber)">게임 인사이트</div>
+        <div class="post-title">소셜 카지노 40-70대 유저가 진짜 원하는 것 — 인터뷰 3건 정리</div>
+        <div class="post-author">UE팀장 · 1주 전</div>
+      </div>
+    </div>
+    <div class="post-body">
+      <div class="post-excerpt">숫자보다 '일상의 리듬'이 더 중요하다. 아침에 로그인해서 보너스 받고 한 판 하는 게 루틴인 유저들이다. 이걸 끊으면 이탈한다. 반대로 이 루틴을 강화하면...</div>
+    </div>
+    <div class="post-footer">
+      <span class="post-reaction">👍 28</span>
+      <span class="post-reaction">💡 15</span>
+      <span class="post-reaction">🔖 33</span>
+      <div class="post-views">조회 289</div>
+    </div>
+  </div>
+
+  <div class="post" onclick="openPost()">
+    <div class="post-header">
+      <div class="post-cat">💬</div>
+      <div class="post-meta">
+        <div class="post-cat-tag" style="color:var(--cyan)">아이디어</div>
+        <div class="post-title">게임 내 AI 튜터가 있으면 신규 유저 이탈을 얼마나 줄일 수 있을까</div>
+        <div class="post-author">[플랫폼] · 4일 전</div>
+      </div>
+    </div>
+    <div class="post-body">
+      <div class="post-excerpt">첫 3판에서 40%가 이탈한다. 룰을 몰라서 지는 게 원인이라고 가정하면, AI가 실시간으로 "지금 이렇게 하면 돼요"를 알려주면 어떨까. 실험 가능한 최소 스펙은...</div>
+    </div>
+    <div class="post-footer">
+      <span class="post-reaction">👍 14</span>
+      <span class="post-reaction">💡 19</span>
+      <span class="post-reaction">🔖 11</span>
+      <div class="post-views">조회 122</div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT SIDEBAR -->
+<div class="sidebar">
+  <div class="incentive-box">
+    <div class="ib-title">이달의 픽 선정 중 🏆</div>
+    <div class="ib-text">이번달 가장 도움이 된 글 3편을 선정합니다. 조회 40% + 투표 40% + 인사팀 20%.<br><br><strong style="color:var(--amber)">마감 D-8</strong></div>
+    <button class="ib-cta" onclick="alert('투표하기 화면으로 이동합니다.')">투표하기 →</button>
+  </div>
+
+  <div class="pick-section">
+    <div class="pick-title">이번달 TOP 5</div>
+    <div class="pick-item">
+      <div class="pick-rank">01</div>
+      <div class="pick-info">
+        <div class="pick-name">Figma→Unity 에셋 네이밍 컨벤션</div>
+        <div class="pick-author">[브랜드디자인] · 조회 341</div>
+      </div>
+    </div>
+    <div class="pick-item">
+      <div class="pick-rank">02</div>
+      <div class="pick-info">
+        <div class="pick-name">소셜 카지노 40-70대 유저 인터뷰</div>
+        <div class="pick-author">UE팀장 · 조회 289</div>
+      </div>
+    </div>
+    <div class="pick-item">
+      <div class="pick-rank">03</div>
+      <div class="pick-info">
+        <div class="pick-name">Claude 기획서 초안 프롬프트</div>
+        <div class="pick-author">[브랜드디자인] · 조회 203</div>
+      </div>
+    </div>
+    <div class="pick-item">
+      <div class="pick-rank">04</div>
+      <div class="pick-info">
+        <div class="pick-name">포커 데일리 미션 실패 분석</div>
+        <div class="pick-author">[플랫폼] · 조회 156</div>
+      </div>
+    </div>
+    <div class="pick-item">
+      <div class="pick-rank">05</div>
+      <div class="pick-info">
+        <div class="pick-name">AI 튜터 신규 유저 이탈 가설</div>
+        <div class="pick-author">[플랫폼] · 조회 122</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-box">
+    <div class="sb-title">이번달 현황</div>
+    <div class="stat-row"><div class="stat-row-l">전체 글</div><div class="stat-row-v">47건</div></div>
+    <div class="stat-row"><div class="stat-row-l">활성 기고자</div><div class="stat-row-v">28명</div></div>
+    <div class="stat-row"><div class="stat-row-l">AI 검색</div><div class="stat-row-v">203회</div></div>
+    <div class="stat-row"><div class="stat-row-l">이모지 반응</div><div class="stat-row-v">189개</div></div>
+    <div class="stat-row"><div class="stat-row-l">참여 본부</div><div class="stat-row-v">3개</div></div>
+  </div>
+</div>
+</div>
+
+<!-- WRITE MODAL -->
+<div class="modal-overlay" id="write-modal">
+  <div class="modal">
+    <div class="modal-title">알고 있는 것을 남긴다</div>
+    <div class="modal-sub">완성 안 돼도 괜찮습니다. 시도한 것, 배운 것, 실패한 것 모두 가치 있습니다.</div>
+    <div class="cat-pick-row">
+      <div class="cat-pick selected" onclick="pickCat(this)"><div class="cat-pick-emoji">🛠</div><div class="cat-pick-label">실무<br>노하우</div></div>
+      <div class="cat-pick" onclick="pickCat(this)"><div class="cat-pick-emoji">🤖</div><div class="cat-pick-label">AI<br>활용</div></div>
+      <div class="cat-pick" onclick="pickCat(this)"><div class="cat-pick-emoji">🔬</div><div class="cat-pick-label">시도한<br>것</div></div>
+      <div class="cat-pick" onclick="pickCat(this)"><div class="cat-pick-emoji">📊</div><div class="cat-pick-label">게임<br>인사이트</div></div>
+      <div class="cat-pick" onclick="pickCat(this)"><div class="cat-pick-emoji">💬</div><div class="cat-pick-label">아이디어</div></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">제목</label>
+      <input class="form-input" type="text" placeholder="한 줄로 — 무엇을 배웠는지, 무엇을 시도했는지">
+    </div>
+    <div class="form-group">
+      <label class="form-label">내용</label>
+      <textarea class="form-textarea" placeholder="상황 / 시도한 것 / 결과 / 다음엔 이렇게 할 것&#10;&#10;형식 없이 자유롭게. 짧아도 됩니다."></textarea>
+      <div class="form-note">평가에 반영되지 않습니다. 올리지 않아도 불이익 없습니다.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-submit" onclick="submitPost()">올리기</button>
+      <button class="btn-cancel" onclick="closeWrite()">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const fakeSearchResults = [
+  {title:'슬롯 게임 스핀 UX 개선 — 햅틱 피드백 실험', meta:'[브랜드디자인] · 3주 전 · 실무 노하우'},
+  {title:'포인터 이벤트 A/B 테스트 결과 — 버튼 크기 vs 위치', meta:'[플랫폼] · 2주 전 · 시도한 것'},
+  {title:'소셜 카지노 UX 패턴 분석 — 3개 경쟁 앱 비교', meta:'UE팀장 · 1달 전 · 게임 인사이트'},
+];
+
+function onSearch(v){
+  if(v.length > 2){
+    document.getElementById('ai-results').style.display='block';
+    document.getElementById('air-items').innerHTML=fakeSearchResults.map(r=>`
+      <div class="air-item" onclick="openPost()">
+        <div class="air-title">${r.title}</div>
+        <div class="air-meta">${r.meta}</div>
+      </div>`).join('');
+  } else {
+    document.getElementById('ai-results').style.display='none';
+  }
+}
+function runSearch(){onSearch(document.getElementById('search-inp').value);}
+function setCat(el){document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function openWrite(){document.getElementById('write-modal').classList.add('open');}
+function closeWrite(){document.getElementById('write-modal').classList.remove('open');}
+function pickCat(el){document.querySelectorAll('.cat-pick').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function submitPost(){alert('글이 올라갔습니다. 👍');closeWrite();}
+function openPost(){alert('글 상세 페이지로 이동합니다.');}
+</script>
+</body>
+</html>
